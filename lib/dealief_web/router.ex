@@ -5,7 +5,9 @@ defmodule DealiefWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/api", DealiefWeb do
+  scope "/api/v1", DealiefWeb.Api.V1, as: :api_v1 do 
     pipe_through :api
+    
+    resources "/users", UserController
   end
 end
