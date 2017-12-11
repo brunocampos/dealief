@@ -9,3 +9,12 @@
 #
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
+alias Dealief.Account
+
+users = [
+  %{"email" => "john_smith@example.com", "full_name" => "John Smith", "password" => "password1"},
+  %{"email" => "anna@example.com", "full_name" => "Anna Logan", "password" => "password2"},
+  %{"email" => "matthias@example.com", "full_name" => "Matthias Meyer", "password" => "password3"}
+]
+
+Enum.each(users, fn(user) -> Account.create_user(user) end)
