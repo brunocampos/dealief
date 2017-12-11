@@ -4,9 +4,9 @@ defmodule DealiefWeb.Api.V1.UserControllerTest do
   alias Dealief.Account
   alias Dealief.Account.User
 
-  @create_attrs %{email: "some email", full_name: "some full_name", password_hash: "some password_hash"}
-  @update_attrs %{email: "some updated email", full_name: "some updated full_name", password_hash: "some updated password_hash"}
-  @invalid_attrs %{email: nil, full_name: nil, password_hash: nil}
+  @create_attrs %{email: "john@example.com", full_name: "John", password: "password"}
+  @update_attrs %{email: "john_smith@example.com", full_name: "John Smith", password: "updated_password"}
+  @invalid_attrs %{email: nil, full_name: nil, password: nil}
 
   def fixture(:user) do
     {:ok, user} = Account.create_user(@create_attrs)
@@ -32,9 +32,8 @@ defmodule DealiefWeb.Api.V1.UserControllerTest do
       conn = get conn, api_v1_user_path(conn, :show, id)
       assert json_response(conn, 200)["data"] == %{
         "id" => id,
-        "email" => "some email",
-        "full_name" => "some full_name",
-        "password_hash" => "some password_hash"}
+        "email" => @create_attrs.email,
+        "full_name" => @create_attrs.full_name}
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
@@ -53,9 +52,8 @@ defmodule DealiefWeb.Api.V1.UserControllerTest do
       conn = get conn, api_v1_user_path(conn, :show, id)
       assert json_response(conn, 200)["data"] == %{
         "id" => id,
-        "email" => "some updated email",
-        "full_name" => "some updated full_name",
-        "password_hash" => "some updated password_hash"}
+        "email" => @update_attrs.email,
+        "full_name" => @update_attrs.full_name}
     end
 
     test "renders errors when data is invalid", %{conn: conn, user: user} do
