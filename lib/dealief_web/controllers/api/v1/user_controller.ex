@@ -1,5 +1,6 @@
 defmodule DealiefWeb.Api.V1.UserController do
   use DealiefWeb, :controller
+  import DealiefWeb.ControllerHelper
 
   alias Dealief.Account
   alias Dealief.Account.User
@@ -13,10 +14,11 @@ defmodule DealiefWeb.Api.V1.UserController do
 
   def create(conn, %{"user" => user_params}) do
     with {:ok, %User{} = user} <- Account.create_user(user_params) do
+      token = generate_user_token(user.id)      
       conn
       |> put_status(:created)
       |> put_resp_header("location", api_v1_user_path(conn, :show, user))
-      |> render("show.json", user: user)
+      |> render("show.json", user: user, token: token)
     end
   end
 
