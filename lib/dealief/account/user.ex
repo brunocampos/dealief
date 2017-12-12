@@ -2,6 +2,7 @@ defmodule Dealief.Account.User do
   use Ecto.Schema
   import Ecto.Changeset
   alias Dealief.Account.User
+  alias Dealief.Agreement.Contract
   import Comeonin.Bcrypt, only: [hashpwsalt: 1]
   
   schema "users" do
@@ -9,6 +10,7 @@ defmodule Dealief.Account.User do
     field :full_name, :string
     field :password_hash, :string
     field :password, :string, virtual: true
+    has_many :contracts, Contract
     
     timestamps()
   end
