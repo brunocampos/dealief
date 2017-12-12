@@ -2,6 +2,7 @@ defmodule Dealief.AgreementTest do
   use Dealief.DataCase
 
   alias Dealief.Agreement
+  alias Dealief.Account
 
   describe "vendors" do
     alias Dealief.Agreement.Vendor
@@ -67,10 +68,12 @@ defmodule Dealief.AgreementTest do
 
   describe "contracts" do
     alias Dealief.Agreement.Contract
+    alias Dealief.Agreement.ContractDate
 
-    @valid_attrs %{details: "some details", ends_on: ~N[2010-04-17 14:00:00.000000], name: "some name", price: "120.5", starts_on: ~N[2010-04-17 14:00:00.000000]}
-    @update_attrs %{details: "some updated details", ends_on: ~N[2011-05-18 15:01:01.000000], name: "some updated name", price: "456.7", starts_on: ~N[2011-05-18 15:01:01.000000]}
+    @valid_attrs %{details: "4G - unlimited", ends_on: "10-11-2018", name: "Vodafone 4G", price: "25.99", starts_on: "23-02-2016" }
+    @update_attrs %{details: "5G - unlimited", ends_on: "10-11-2020", name: "Vodafone 5G", price: "27.99", starts_on: "01-01-2018"}
     @invalid_attrs %{details: nil, ends_on: nil, name: nil, price: nil, starts_on: nil}
+    @user_attrs %{email: "john_smith@example.com", full_name: "John Smith", password: "secret"}
 
     def contract_fixture(attrs \\ %{}) do
       {:ok, contract} =
@@ -81,54 +84,84 @@ defmodule Dealief.AgreementTest do
       contract
     end
 
+    def parse_date(date) do
+      {:ok, date} = ContractDate.cast(date)
+      date
+    end
+
+    def user_fixture() do
+      {:ok, user} = Account.create_user(@user_attrs)
+      user
+    end
+
+    def contract_associations() do
+      user = user_fixture()
+      vendor = vendor_fixture()
+      %{user_id: user.id, vendor_id: vendor.id}
+    end    
+
     test "list_contracts/0 returns all contracts" do
-      contract = contract_fixture()
+      contract = contract_associations() |> contract_fixture()
+
       assert Agreement.list_contracts() == [contract]
     end
 
     test "get_contract!/1 returns the contract with given id" do
-      contract = contract_fixture()
+      contract = contract_associations() |> contract_fixture()
+
       assert Agreement.get_contract!(contract.id) == contract
     end
 
     test "create_contract/1 with valid data creates a contract" do
-      assert {:ok, %Contract{} = contract} = Agreement.create_contract(@valid_attrs)
-      assert contract.details == "some details"
-      assert contract.ends_on == ~N[2010-04-17 14:00:00.000000]
-      assert contract.name == "some name"
-      assert contract.price == Decimal.new("120.5")
-      assert contract.starts_on == ~N[2010-04-17 14:00:00.000000]
+      attrs = Map.merge(@valid_attrs, contract_associations())
+
+      assert {:ok, %Contract{} = contract} = Agreement.create_contract(attrs)
+      assert contract.details == @valid_attrs.details
+      assert contract.ends_on == parse_date(@valid_attrs.ends_on)
+      assert contract.name == @valid_attrs.name
+      assert contract.price == Decimal.new(@valid_attrs.price)
+      assert contract.starts_on == parse_date(@valid_attrs.starts_on)
     end
 
     test "create_contract/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Agreement.create_contract(@invalid_attrs)
+      attrs = Map.merge(@invalid_attrs, contract_associations())
+
+      assert {:error, %Ecto.Changeset{}} = Agreement.create_contract(attrs)
     end
 
     test "update_contract/2 with valid data updates the contract" do
-      contract = contract_fixture()
-      assert {:ok, contract} = Agreement.update_contract(contract, @update_attrs)
+      associations_attrs = contract_associations()
+      contract = contract_fixture(associations_attrs)
+      attrs = Map.merge(@update_attrs, associations_attrs)
+
+      assert {:ok, contract} = Agreement.update_contract(contract,attrs)
       assert %Contract{} = contract
-      assert contract.details == "some updated details"
-      assert contract.ends_on == ~N[2011-05-18 15:01:01.000000]
-      assert contract.name == "some updated name"
-      assert contract.price == Decimal.new("456.7")
-      assert contract.starts_on == ~N[2011-05-18 15:01:01.000000]
+      assert contract.details == @update_attrs.details
+      assert contract.ends_on == parse_date(@update_attrs.ends_on)
+      assert contract.name == @update_attrs.name
+      assert contract.price == Decimal.new(@update_attrs.price)
+      assert contract.starts_on == parse_date(@update_attrs.starts_on)
     end
 
     test "update_contract/2 with invalid data returns error changeset" do
-      contract = contract_fixture()
-      assert {:error, %Ecto.Changeset{}} = Agreement.update_contract(contract, @invalid_attrs)
+      associations_attrs = contract_associations()
+      contract = contract_fixture(associations_attrs)
+      attrs = Map.merge(@invalid_attrs, associations_attrs)
+
+      assert {:error, %Ecto.Changeset{}} = Agreement.update_contract(contract, attrs)
       assert contract == Agreement.get_contract!(contract.id)
     end
 
     test "delete_contract/1 deletes the contract" do
-      contract = contract_fixture()
+      contract = contract_associations() |> contract_fixture()
+
       assert {:ok, %Contract{}} = Agreement.delete_contract(contract)
       assert_raise Ecto.NoResultsError, fn -> Agreement.get_contract!(contract.id) end
     end
 
     test "change_contract/1 returns a contract changeset" do
-      contract = contract_fixture()
+      contract = contract_associations() |> contract_fixture()
+      
       assert %Ecto.Changeset{} = Agreement.change_contract(contract)
     end
   end
