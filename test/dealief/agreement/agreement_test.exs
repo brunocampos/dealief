@@ -106,6 +106,20 @@ defmodule Dealief.AgreementTest do
       assert Agreement.list_contracts() == [contract]
     end
 
+    test "list_user_contracts/1 returns only contracts from specified user" do
+      user = user_fixture()
+      vendor = vendor_fixture()
+      user_contract = contract_fixture(%{user_id: user.id, vendor_id: vendor.id}) |> Repo.preload(:vendor) |> Repo.preload(:user)
+      
+      {:ok, other_user} = Account.create_user(%{email: "matthias@example.com", full_name: "Matthias Meyer", password: "othersecret"})
+      {:ok, other_vendor} = Agreement.create_vendor(%{"name" => "Netflix", "category" => "Media"})
+      other_contract_attrs = %{details: "Netflix HD Plan", ends_on: "24-05-2021", name: "Netflix HD", price: "19.99", starts_on: "01-08-2017", user_id: other_user.id, vendor_id: other_vendor.id }
+      {:ok, other_user_contract} = Agreement.create_contract(other_contract_attrs)
+
+      refute Agreement.list_user_contracts(user.id) == [user_contract, other_user_contract]
+      assert Agreement.list_user_contracts(user.id) == [user_contract]
+    end    
+
     test "get_contract!/1 returns the contract with given id" do
       contract = contract_associations() |> contract_fixture()
 
@@ -161,7 +175,7 @@ defmodule Dealief.AgreementTest do
 
     test "change_contract/1 returns a contract changeset" do
       contract = contract_associations() |> contract_fixture()
-      
+
       assert %Ecto.Changeset{} = Agreement.change_contract(contract)
     end
   end

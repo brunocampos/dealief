@@ -40,6 +40,14 @@ defmodule Dealief.Agreement do
     Repo.all(Contract)
   end
 
+  def list_user_contracts(user_id) do
+    Contract
+    |> where(user_id: ^user_id)
+    |> preload(:user)
+    |> preload(:vendor)
+    |> Repo.all
+  end
+  
   def get_contract!(id), do: Repo.get!(Contract, id)
 
   def create_contract(attrs \\ %{}) do
