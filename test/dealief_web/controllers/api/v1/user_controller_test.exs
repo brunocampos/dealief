@@ -1,5 +1,6 @@
 defmodule DealiefWeb.Api.V1.UserControllerTest do
   use DealiefWeb.ConnCase
+  import DealiefWeb.ControllerHelper
 
   alias Dealief.Account
   alias Dealief.Account.User
@@ -25,40 +26,57 @@ defmodule DealiefWeb.Api.V1.UserControllerTest do
   end
 
   describe "create user" do
-    test "renders user when data is valid", %{conn: conn} do
+    test "renders user and token when data is valid", %{conn: conn} do      
       conn = post conn, api_v1_user_path(conn, :create), user: @create_attrs
-      assert %{"id" => id} = json_response(conn, 201)["data"]
-
-      conn = get conn, api_v1_user_path(conn, :show, id)
-      assert json_response(conn, 200)["data"] == %{
-        "id" => id,
-        "email" => @create_attrs.email,
-        "full_name" => @create_attrs.full_name}
+      email = @create_attrs.email
+      full_name = @create_attrs.full_name
+      
+      assert %{"id" => id, "token" => token,
+      "email" => ^email, "full_name" => ^full_name} = json_response(conn, 201)["data"]
+      assert {:ok, ^id} = verify_user_token(token)
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
       conn = post conn, api_v1_user_path(conn, :create), user: @invalid_attrs
-      assert json_response(conn, 422)["errors"] != %{}
+      
+      assert json_response(conn, 422)["errors"] == %{
+        "email" => ["should not be empty"],
+        "full_name" => ["should not be empty"],
+        "password" => ["should not be empty"]
+      }      
     end
+
+    test "render error when user tries to register with an existing email", %{conn: conn} do
+      fixture(:user)    
+      conn = post conn, api_v1_user_path(conn, :create), user: @create_attrs
+
+      assert json_response(conn, 422)["errors"] == %{
+        "email" => ["has already been taken"]
+      }
+    end    
   end
 
   describe "update user" do
     setup [:create_user]
 
-    test "renders user when data is valid", %{conn: conn, user: %User{id: id} = user} do
+    test "renders user and token when data is valid", %{conn: conn, user: %User{id: id} = user} do      
       conn = put conn, api_v1_user_path(conn, :update, user), user: @update_attrs
-      assert %{"id" => ^id} = json_response(conn, 200)["data"]
+      email = @update_attrs.email
+      full_name = @update_attrs.full_name
 
-      conn = get conn, api_v1_user_path(conn, :show, id)
-      assert json_response(conn, 200)["data"] == %{
-        "id" => id,
-        "email" => @update_attrs.email,
-        "full_name" => @update_attrs.full_name}
+      assert %{"id" => ^id, "token" => token,
+      "email" => ^email, "full_name" => ^full_name} = json_response(conn, 200)["data"]
+      assert {:ok, ^id} = verify_user_token(token)
     end
 
     test "renders errors when data is invalid", %{conn: conn, user: user} do
       conn = put conn, api_v1_user_path(conn, :update, user), user: @invalid_attrs
-      assert json_response(conn, 422)["errors"] != %{}
+
+      assert json_response(conn, 422)["errors"] == %{
+        "email" => ["should not be empty"],
+        "full_name" => ["should not be empty"],
+        "password" => ["should not be empty"]
+      }
     end
   end
 

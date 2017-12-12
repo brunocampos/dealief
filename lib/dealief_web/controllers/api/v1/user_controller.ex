@@ -31,7 +31,8 @@ defmodule DealiefWeb.Api.V1.UserController do
     user = Account.get_user!(id)
 
     with {:ok, %User{} = user} <- Account.update_user(user, user_params) do
-      render(conn, "show.json", user: user)
+      token = generate_user_token(user.id)
+      render(conn, "show.json", user: user, token: token)
     end
   end
 
