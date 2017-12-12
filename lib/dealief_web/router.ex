@@ -9,6 +9,7 @@ defmodule DealiefWeb.Router do
     pipe_through :api
     
     resources "/users", UserController
-    resources "/vendors", VendorController, only: [:index, :show]    
+    resources "/vendors", VendorController, only: [:index, :show]
+    resources "/contracts", ContractController    
   end
 end

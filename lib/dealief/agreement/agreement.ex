@@ -33,4 +33,32 @@ defmodule Dealief.Agreement do
   def change_vendor(%Vendor{} = vendor) do
     Vendor.changeset(vendor, %{})
   end
+
+  alias Dealief.Agreement.Contract
+
+  def list_contracts do
+    Repo.all(Contract)
+  end
+
+  def get_contract!(id), do: Repo.get!(Contract, id)
+
+  def create_contract(attrs \\ %{}) do
+    %Contract{}
+    |> Contract.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def update_contract(%Contract{} = contract, attrs) do
+    contract
+    |> Contract.changeset(attrs)
+    |> Repo.update()
+  end
+
+  def delete_contract(%Contract{} = contract) do
+    Repo.delete(contract)
+  end
+
+  def change_contract(%Contract{} = contract) do
+    Contract.changeset(contract, %{})
+  end
 end
