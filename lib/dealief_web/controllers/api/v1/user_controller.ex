@@ -7,6 +7,8 @@ defmodule DealiefWeb.Api.V1.UserController do
 
   action_fallback DealiefWeb.FallbackController
 
+  plug :resource_ownership when action in [:show, :update, :delete]
+
   def index(conn, _params) do
     users = Account.list_users()
     render(conn, "index.json", users: users)
@@ -40,6 +42,17 @@ defmodule DealiefWeb.Api.V1.UserController do
     user = Account.get_user!(id)
     with {:ok, %User{}} <- Account.delete_user(user) do
       send_resp(conn, :no_content, "")
+    end
+  end
+
+  defp resource_ownership(conn, _) do
+    if conn.assigns.current_user_id != String.to_integer(conn.params["id"]) do
+      conn
+      |> put_status(404)
+      |> json(%{error: "User not found"})
+      |> halt
+    else
+      conn
     end
   end
 end
