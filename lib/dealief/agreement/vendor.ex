@@ -2,11 +2,13 @@ defmodule Dealief.Agreement.Vendor do
   use Ecto.Schema
   import Ecto.Changeset
   alias Dealief.Agreement.Vendor
+  alias Dealief.Agreement.Contract
 
 
   schema "vendors" do
     field :category, :string
     field :name, :string
+    has_many :contracts, Contract
 
     timestamps()
   end
