@@ -50,6 +50,19 @@ defmodule Dealief.Agreement do
   
   def get_contract!(id), do: Repo.get!(Contract, id)
 
+  def get_user_contract(contract_id, user_id) do
+    Contract
+    |> where(id: ^contract_id)
+    |> where(user_id: ^user_id)
+    |> preload(:vendor)
+    |> preload(:user)
+    |> Repo.one()
+    |> case  do
+      nil -> {:error, :not_found, "Contract not found"}
+      contract -> {:ok, contract}
+    end
+  end  
+
   def create_contract(attrs \\ %{}) do
     %Contract{}
     |> Contract.changeset(attrs)

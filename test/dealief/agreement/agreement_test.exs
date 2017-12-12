@@ -118,6 +118,14 @@ defmodule Dealief.AgreementTest do
 
       refute Agreement.list_user_contracts(user.id) == [user_contract, other_user_contract]
       assert Agreement.list_user_contracts(user.id) == [user_contract]
+    end
+    
+    test "get_user_contract/1 returns a contract with given contract id and user id " do
+      user = user_fixture()
+      vendor = vendor_fixture()
+      user_contract = contract_fixture(%{user_id: user.id, vendor_id: vendor.id}) |> Repo.preload(:vendor) |> Repo.preload(:user)
+
+      assert {:ok, ^user_contract} = Agreement.get_user_contract(user_contract.id, user.id)
     end    
 
     test "get_contract!/1 returns the contract with given id" do
