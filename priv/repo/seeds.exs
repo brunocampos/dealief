@@ -10,6 +10,7 @@
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
 alias Dealief.Account
+alias Dealief.Agreement
 
 users = [
   %{"email" => "john_smith@example.com", "full_name" => "John Smith", "password" => "password1"},
@@ -18,3 +19,13 @@ users = [
 ]
 
 Enum.each(users, fn(user) -> Account.create_user(user) end)
+
+vendors = [
+  %{"name" => "O2", "category" => "Telecommunications"},
+  %{"name" => "Vodafone", "category" => "Telecommunications"},
+  %{"name" => "Verizon", "category" => "Telecommunications"},
+  %{"name" => "Allianz", "category" => "Insurance"},
+  %{"name" => "Netflix", "category" => "Media"}
+]
+
+Enum.each(vendors, fn(vendor) -> Agreement.create_vendor(vendor) end)
