@@ -7,6 +7,7 @@ defmodule DealiefWeb.Router do
 
   pipeline :api_restricted do
     plug :accepts, ["json"]
+    plug DealiefWeb.Plugs.ApiAuthorizeUser
   end
 
   scope "/api/v1", DealiefWeb.Api.V1, as: :api_v1 do 
