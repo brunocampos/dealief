@@ -39,7 +39,7 @@ config :phoenix, :stacktrace_depth, 20
 # Configure your database
 config :dealief, Dealief.Repo,
   adapter: Ecto.Adapters.Postgres,
-  username: "postgres",
+  username: "brunocampos",
   password: "password",
   database: "dealief_dev",
   hostname: "localhost",
